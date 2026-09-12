@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff9ef">
+  <meta name="description" content="반짝이는 색깔 순서를 기억하고, 같은 순서로 눌러보세요. 다섯 단계에 도전하는 색깔 기억력 게임.">
+  <title>색깔 주문 맞추기</title>
+  <link rel="icon" href="Images/palette-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main class="game-shell">
+    <header class="topbar">
+      <span class="brand"><img src="Images/palette-icon.png" alt="" width="40" height="40"> 작은 기억력 놀이터</span>
+      <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="false" aria-label="소리 끄기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="sound-waves" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg>
+        <span id="sound-label">소리 켜짐</span>
+      </button>
+    </header>
+
+    <section class="game-card" aria-labelledby="game-title">
+      <header class="game-heading">
+        <p class="eyebrow">COLOR MEMORY</p>
+        <h1 id="game-title">색깔 주문 맞추기</h1>
+        <p class="subtitle">반짝이는 순서를 기억하고, 같은 순서로 눌러보세요.</p>
+      </header>
+
+      <div class="scoreboard" aria-label="게임 기록">
+        <div><span class="stat-label">현재 단계</span><p><strong id="level">1</strong><span class="stat-unit"> / 5</span></p></div>
+        <div><span class="stat-label">나의 점수</span><p><strong id="score">0</strong><span class="stat-unit"> 점</span></p></div>
+        <div><span class="stat-label">최고 기록</span><p><strong id="best-score">0</strong><span class="stat-unit"> 점</span></p></div>
+      </div>
+
+      <div class="stage-track" id="stage-track" aria-label="5단계 중 0단계 완료">
+        <span data-stage="1">1</span><i></i><span data-stage="2">2</span><i></i><span data-stage="3">3</span><i></i><span data-stage="4">4</span><i></i><span data-stage="5">5</span>
+      </div>
+
+      <div class="status-area" role="status" aria-live="polite" aria-atomic="true">
+        <img id="status-image" src="Images/memory-lightbulb.png" alt="" width="72" height="72">
+        <div><p id="phase-label" class="phase-label">준비되셨나요?</p><h2 id="status-title">기억력에 불을 켜볼까요?</h2><p id="status-detail">하나씩 늘어나는 색깔 순서, 5단계에 도전해 보세요.</p></div>
+      </div>
+
+      <div id="play-area">
+        <div class="color-buttons" role="group" aria-label="색깔 선택">
+          <button class="color-button red" data-color="red" type="button" aria-disabled="true" aria-label="빨강, 숫자 1"><span class="color-symbol" aria-hidden="true">●</span><span class="color-name">빨강</span><kbd>1</kbd></button>
+          <button class="color-button blue" data-color="blue" type="button" aria-disabled="true" aria-label="파랑, 숫자 2"><span class="color-symbol" aria-hidden="true">◆</span><span class="color-name">파랑</span><kbd>2</kbd></button>
+          <button class="color-button green" data-color="green" type="button" aria-disabled="true" aria-label="초록, 숫자 3"><span class="color-symbol" aria-hidden="true">▲</span><span class="color-name">초록</span><kbd>3</kbd></button>
+        </div>
+        <div class="input-progress" id="input-progress" aria-label="입력 진행 상황"></div>
+      </div>
+
+      <section id="result" class="result" aria-label="게임 결과" hidden>
+        <p id="result-summary"></p>
+        <p class="result-score"><strong id="final-score">0</strong><span> / 50점</span></p>
+        <p id="result-record"></p>
+      </section>
+
+      <div class="controls">
+        <button id="start-button" type="button" class="primary-button">게임 시작 <span aria-hidden="true">▶</span></button>
+        <button id="retry-button" type="button" class="primary-button" hidden>다시 하기 <span aria-hidden="true">↻</span></button>
+        <p id="control-hint">시간 제한 없이, 천천히 즐겨요.</p>
+      </div>
+      <noscript><p>게임을 실행하려면 브라우저에서 JavaScript를 켜주세요.</p></noscript>
+    </section>
+
+    <footer class="how-to" aria-label="게임 방법">
+      <span><b>01</b> 색깔 순서 기억하기</span><span><b>02</b> 같은 순서로 누르기</span><span><b>03</b> 단계마다 10점 획득</span>
+    </footer>
+    <p class="footer-note">마우스 · 터치 · 숫자 1, 2, 3으로 플레이</p>
+  </main>
+</body>
+</html>
