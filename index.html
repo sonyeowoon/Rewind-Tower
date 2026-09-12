@@ -1,74 +1,70 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fff9ef">
-  <meta name="description" content="반짝이는 색깔 순서를 기억하고, 같은 순서로 눌러보세요. 다섯 단계에 도전하는 색깔 기억력 게임.">
-  <title>색깔 주문 맞추기</title>
-  <link rel="icon" href="Images/palette-icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1420">
+  <meta name="description" content="위치만 되돌리는 시간의 힘으로 열 층의 시계탑을 탈출하는 퍼즐 게임.">
+  <title>Rewind Tower · 되감는 시계탑</title>
+  <link rel="icon" href="assets/images/time-gear.png">
   <link rel="stylesheet" href="style.css">
-  <script src="game.js" defer></script>
+  <script type="module" src="game.js"></script>
 </head>
 <body>
-  <main class="game-shell">
-    <header class="topbar">
-      <span class="brand"><img src="Images/palette-icon.png" alt="" width="40" height="40"> 작은 기억력 놀이터</span>
-      <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="false" aria-label="소리 끄기">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="sound-waves" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/><path class="sound-off" d="m16 9 6 6m0-6-6 6"/></svg>
-        <span id="sound-label">소리 켜짐</span>
-      </button>
-    </header>
+  <div class="world-backdrop" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" id="brand-home" aria-label="Rewind Tower 메인 화면"><span class="brand-mark">↶</span><span>REWIND <b>TOWER</b><small>되감는 시계탑</small></span></a>
+    <div class="top-actions"><span id="profile-name" class="profile-name"></span><button class="icon-button" id="help-button" aria-label="조작법">?</button><button class="icon-button" id="mute-button" aria-label="음소거" aria-pressed="false">♫</button><button id="logout-button" class="text-button" hidden>로그아웃</button></div>
+  </header>
 
-    <section class="game-card" aria-labelledby="game-title">
-      <header class="game-heading">
-        <p class="eyebrow">COLOR MEMORY</p>
-        <h1 id="game-title">색깔 주문 맞추기</h1>
-        <p class="subtitle">반짝이는 순서를 기억하고, 같은 순서로 눌러보세요.</p>
-      </header>
-
-      <div class="scoreboard" aria-label="게임 기록">
-        <div><span class="stat-label">현재 단계</span><p><strong id="level">1</strong><span class="stat-unit"> / 5</span></p></div>
-        <div><span class="stat-label">나의 점수</span><p><strong id="score">0</strong><span class="stat-unit"> 점</span></p></div>
-        <div><span class="stat-label">최고 기록</span><p><strong id="best-score">0</strong><span class="stat-unit"> 점</span></p></div>
+  <p id="boot-status" class="boot-status" role="status">게임 파일을 불러오는 중입니다. 화면이 반응하지 않으면 localhost 또는 HTTPS 주소인지 확인하고 새로고침하세요.</p>
+  <p id="storage-warning" class="storage-warning" role="status" hidden>브라우저 저장을 사용할 수 없어 이번 창에서만 플레이할 수 있습니다. 창을 닫거나 새로고침하면 기록이 사라집니다.</p>
+  <main id="app">
+    <section id="login-screen" class="screen landing">
+      <div class="hero-copy"><p class="eyebrow">A LITTLE ADVENTURE THROUGH TIME</p><h1>REWIND<br><span>TOWER</span></h1><div class="title-rule"><i></i><span>되감는 시계탑</span><i></i></div><p class="hero-description">모든 것이 멈춘 시계탑.<br>당신의 한 걸음이 시간을 다시 움직입니다.</p><div class="hero-meta"><span>10개의 이야기</span><span>시간을 되감는 퍼즐</span><span>나만의 기록</span></div></div>
+      <div class="entry-panel panel">
+        <div class="panel-topline"><span>EXPLORER'S JOURNAL</span><span>01 / 10</span></div>
+        <img class="entry-hourglass" src="assets/images/hourglass.png" alt="">
+        <h2 id="auth-title">시계탑에 오신 것을 환영합니다</h2><p id="auth-description" class="muted">기록을 열고, 멈춘 시간 속으로 들어가세요.</p>
+        <form id="auth-form">
+          <label for="nickname">탐험가 닉네임 <span>2–12자</span></label><input id="nickname" name="nickname" type="text" minlength="2" maxlength="12" autocomplete="username" placeholder="닉네임을 입력하세요" required>
+          <label for="pin">4자리 PIN</label><input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="current-password" placeholder="••••" required>
+          <div id="pin-confirm-group" hidden><label for="pin-confirm">PIN 확인</label><input id="pin-confirm" name="pin-confirm" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="new-password" placeholder="PIN을 한 번 더 입력하세요"></div>
+          <p id="auth-error" class="form-error" role="alert"></p><button type="submit" id="auth-submit" class="primary wide">기록 열기 <span>→</span></button>
+        </form>
+        <button id="auth-toggle" class="text-button wide">처음 오셨나요? <strong>새 계정 만들기</strong></button>
+        <p class="local-notice"><span>◇ 이 브라우저에만 보관되는 작은 기록</span>게임용 닉네임과 PIN을 사용하세요. 온라인 계정이 아니며, 브라우저 데이터를 지우면 기록도 사라집니다.</p>
       </div>
-
-      <div class="stage-track" id="stage-track" aria-label="5단계 중 0단계 완료">
-        <span data-stage="1">1</span><i></i><span data-stage="2">2</span><i></i><span data-stage="3">3</span><i></i><span data-stage="4">4</span><i></i><span data-stage="5">5</span>
-      </div>
-
-      <div class="status-area" role="status" aria-live="polite" aria-atomic="true">
-        <img id="status-image" src="Images/memory-lightbulb.png" alt="" width="72" height="72">
-        <div><p id="phase-label" class="phase-label">준비되셨나요?</p><h2 id="status-title">기억력에 불을 켜볼까요?</h2><p id="status-detail">매 라운드 새로운 색깔 패턴, 5단계에 도전해 보세요.</p></div>
-      </div>
-
-      <div id="play-area">
-        <div class="color-buttons" role="group" aria-label="색깔 선택">
-          <button class="color-button red" data-color="red" type="button" aria-disabled="true" aria-label="빨강, 숫자 1"><span class="color-symbol" aria-hidden="true">●</span><span class="color-name">빨강</span><kbd>1</kbd></button>
-          <button class="color-button blue" data-color="blue" type="button" aria-disabled="true" aria-label="파랑, 숫자 2"><span class="color-symbol" aria-hidden="true">◆</span><span class="color-name">파랑</span><kbd>2</kbd></button>
-          <button class="color-button green" data-color="green" type="button" aria-disabled="true" aria-label="초록, 숫자 3"><span class="color-symbol" aria-hidden="true">▲</span><span class="color-name">초록</span><kbd>3</kbd></button>
-        </div>
-        <div class="input-progress" id="input-progress" aria-label="입력 진행 상황"></div>
-      </div>
-
-      <section id="result" class="result" aria-label="게임 결과" hidden>
-        <p id="result-summary"></p>
-        <p class="result-score"><strong id="final-score">0</strong><span> / 50점</span></p>
-        <p id="result-record"></p>
-      </section>
-
-      <div class="controls">
-        <button id="start-button" type="button" class="primary-button">게임 시작 <span aria-hidden="true">▶</span></button>
-        <button id="retry-button" type="button" class="primary-button" hidden>다시 하기 <span aria-hidden="true">↻</span></button>
-        <p id="control-hint">시간 제한 없이, 천천히 즐겨요.</p>
-      </div>
-      <noscript><p>게임을 실행하려면 브라우저에서 JavaScript를 켜주세요.</p></noscript>
     </section>
 
-    <footer class="how-to" aria-label="게임 방법">
-      <span><b>01</b> 색깔 순서 기억하기</span><span><b>02</b> 같은 순서로 누르기</span><span><b>03</b> 단계마다 10점 획득</span>
-    </footer>
-    <p class="footer-note">마우스 · 터치 · 숫자 1, 2, 3으로 플레이</p>
+    <section id="main-screen" class="screen landing" hidden>
+      <div class="hero-copy"><p class="eyebrow">YOUR TIME IS WAITING</p><h1>REWIND<br><span>TOWER</span></h1><div class="title-rule"><i></i><span>되감는 시계탑</span><i></i></div><p class="hero-description">돌아갈 수 있는 건, 당신의 위치뿐.<br>이미 바꾼 세상은 그대로 남습니다.</p><div id="journey" class="journey" aria-label="스테이지 진행도"></div></div>
+      <div class="menu-panel panel"><div class="panel-topline"><span>CONTINUE YOUR STORY</span><span>↶</span></div><p class="eyebrow">탐험가의 기록</p><h2><span id="welcome-name"></span> 님,<br>다시 시간을 움직여 볼까요?</h2><div class="record-summary"><div><small>해금한 층</small><strong id="unlocked-count">1 <em>/ 10</em></strong></div><div><small>최고 점수 합계</small><strong id="total-score">0</strong></div></div>
+        <button id="continue-button" class="primary wide">이어하기 <span>→</span></button><p id="save-description" class="save-description"></p><button id="new-game-button" class="secondary wide">새 게임 시작 <span>↗</span></button><button id="stages-button" class="secondary wide">스테이지 선택 <span>☷</span></button><div class="menu-bottom"><button data-action="help" class="text-button">조작법</button><button id="settings-button" class="text-button">설정 및 기록 관리</button></div>
+      </div>
+    </section>
+
+    <section id="stage-screen" class="screen stage-screen" hidden>
+      <button data-action="main" class="text-button back-link">← 메인 화면</button><p class="eyebrow">TEN FLOORS. ONE LOST MOMENT.</p><h2 class="section-title">시계탑을 오르는 여정</h2><p class="muted">한 층씩 시간을 깨우고, 당신의 최고 기록을 남겨보세요.</p><div id="stage-cards" class="stage-cards"></div>
+    </section>
+
+    <section id="game-screen" class="screen game-screen" hidden>
+      <div class="game-heading"><div><p id="stage-subtitle" class="eyebrow"></p><h2><span id="stage-number" class="floor-number"></span><span id="stage-name"></span></h2></div><button data-action="main" class="text-button">← 메인 화면</button></div>
+      <div class="game-layout"><div class="board-column">
+        <div class="hud"><div><small>현재 점수</small><strong id="hud-score">1,000</strong></div><div><small>시간 톱니</small><strong class="gold" id="hud-gears">0 / 3</strong></div><div><small>되감기</small><strong class="cyan" id="hud-rewinds">0</strong></div><div><small>이동</small><strong id="hud-moves">0</strong></div></div>
+        <div class="board-frame"><div id="board-viewport" class="board-viewport"><div id="board" class="board" role="img" aria-label="시계탑 퍼즐 맵"></div></div><div class="board-corner tl"></div><div class="board-corner tr"></div><div class="board-corner bl"></div><div class="board-corner br"></div></div>
+        <div class="board-caption"><span><i class="status-dot"></i><span id="save-status">자동 저장 준비</span></span><button id="map-zoom" class="text-button" aria-pressed="false">맵 확대 ＋</button><span id="position-label"></span><button id="save-button" class="text-button">기록 저장 ↓</button></div>
+      </div><aside class="game-aside">
+        <div class="objective panel"><p class="eyebrow">YOUR OBJECTIVE</p><img src="assets/images/time-gear.png" class="objective-gear" alt=""><h3 id="objective-title">흩어진 시간을 모으세요</h3><p id="objective-text" class="muted"></p><div class="progress-track"><div id="gear-progress"></div></div><div class="objective-footer"><span id="exit-status">출구 잠김</span><span id="key-status">열쇠 0</span></div></div>
+        <div id="tutorial" class="tutorial panel" hidden><p id="tutorial-counter" class="eyebrow"></p><h3 id="tutorial-title"></h3><p id="tutorial-text"></p><div class="tutorial-buttons"><button id="tutorial-skip" class="text-button">건너뛰기</button><button id="tutorial-next" class="small-button">다음 →</button></div></div>
+        <div class="control-panel"><p class="eyebrow">시간은 당신의 편입니다</p><button id="rewind-button" class="rewind-button"><span class="rewind-symbol">↶</span><span>시간 되감기<small>발자국을 거슬러 돌아가기</small></span><kbd>R</kbd></button><div class="dpad" aria-label="이동 조작"><button data-move="up" aria-label="위로 이동">↑</button><button data-move="left" aria-label="왼쪽으로 이동">←</button><button data-move="down" aria-label="아래로 이동">↓</button><button data-move="right" aria-label="오른쪽으로 이동">→</button></div><p class="keyboard-tip">방향키 / WASD 이동 · R 되감기</p><button id="restart-button" class="text-button wide">이 층 다시 시작</button></div>
+      </aside></div>
+      <p id="game-message" class="game-message" role="status" aria-live="polite"></p>
+    </section>
   </main>
+  <footer class="site-footer"><span>REWIND TOWER <i>·</i> 시간을 되찾는 작은 모험</span><span>LOCAL SAVE <i class="status-dot"></i></span></footer>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="modal" class="modal panel" aria-labelledby="modal-title"><button id="modal-close" class="modal-close icon-button" aria-label="닫기">×</button><div id="modal-content"></div></dialog>
+  <noscript>이 게임은 JavaScript를 활성화해야 실행할 수 있습니다.</noscript>
 </body>
 </html>

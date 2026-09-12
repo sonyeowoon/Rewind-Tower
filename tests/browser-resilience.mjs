@@ -1,0 +1,43 @@
+import {createRequire} from 'node:module';
+import assert from 'node:assert/strict';
+import {resolve} from 'node:path';
+import {createStaticServer} from '../scripts/static-server.mjs';
+const require=createRequire(import.meta.url);
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const server=createStaticServer(resolve('dist'),'/test-project/');
+await new Promise(done=>server.listen(0,'127.0.0.1',done));
+const url=`http://127.0.0.1:${server.address().port}/test-project/`;
+const browser=await chromium.launch({headless:true,channel:process.env.BROWSER_CHANNEL||'chrome'});
+try {
+  const context=await browser.newContext({viewport:{width:360,height:800}});
+  await context.addInitScript(()=>{
+    Storage.prototype.getItem=function(){throw new DOMException('Blocked','SecurityError');};
+    Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError');};
+    let plays=0;HTMLMediaElement.prototype.play=function(){if(plays++%2===0)throw new DOMException('Blocked','NotAllowedError');return Promise.reject(new DOMException('Blocked','NotAllowedError'));};
+  });
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(url);
+  assert.equal(await page.locator('#storage-warning').isVisible(),true);
+  await page.locator('#nickname').fill('임시탐험가');await page.locator('#pin').fill('0123');await page.locator('#pin-confirm').fill('0123');await page.locator('#auth-submit').click();
+  await page.locator('#main-screen').waitFor({state:'visible'});await page.locator('#new-game-button').click();await page.locator('#tutorial-skip').click();
+  await page.locator('[data-move=right]').click();assert.equal(await page.locator('#hud-moves').innerText(),'1');
+  await page.locator('#save-button').click();assert.match(await page.locator('#toast').innerText(),/저장할 수 없습니다/);
+  await page.locator('#game-screen [data-action=main]').click();await page.locator('#continue-button').click();assert.equal(await page.locator('#hud-moves').innerText(),'1');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);
+  await context.close();
+  const unsupported=await browser.newContext();await unsupported.addInitScript(()=>Object.defineProperty(crypto,'subtle',{value:undefined}));
+  const p=await unsupported.newPage();await p.goto(url);await p.locator('#nickname').fill('암호테스트');await p.locator('#pin').fill('0123');await p.locator('#pin-confirm').fill('0123');await p.locator('#auth-submit').click();
+  assert.match(await p.locator('#auth-error').innerText(),/localhost 또는 HTTPS/);assert.equal(await p.locator('#main-screen').isVisible(),false);
+  await unsupported.close();
+  const shared=await browser.newContext(),a=await shared.newPage(),b=await shared.newPage();
+  await a.goto(url);await a.locator('#nickname').fill('동시탐험가');await a.locator('#pin').fill('0123');await a.locator('#pin-confirm').fill('0123');await a.locator('#auth-submit').click();
+  await a.locator('#main-screen').waitFor({state:'visible'});await a.locator('#new-game-button').click();await a.locator('#tutorial-skip').click();await a.locator('[data-move=right]').click();
+  await b.goto(url);await b.locator('#nickname').fill('동시탐험가');await b.locator('#pin').fill('0123');await b.locator('#auth-submit').click();await b.locator('#main-screen').waitFor({state:'visible'});await b.locator('#continue-button').click();await b.locator('[data-move=right]').click();
+  await a.locator('#login-screen').waitFor({state:'visible'});
+  await a.reload();assert.equal(await b.locator('#hud-moves').innerText(),'2');
+  await a.evaluate(()=>{const accounts=JSON.parse(localStorage.getItem('rewindTower.accounts'));localStorage.setItem('rewindTower.accounts','[]');for(const key of Object.keys(localStorage))if(key.startsWith(`rewindTower.user.${accounts[0].id}.`))localStorage.removeItem(key);});
+  await b.locator('#login-screen').waitFor({state:'visible'});await b.reload();
+  assert.equal(await b.evaluate(()=>Object.keys(localStorage).filter(k=>k.endsWith('.save')).length),0);
+  await shared.close();
+  console.log('PASS: production subpath survives blocked storage, quota errors, synchronous/rejected autoplay; missing Web Crypto refuses account creation; cross-tab play and account deletion cannot resurrect stale saves.');
+} finally {await browser.close();await new Promise(done=>server.close(done));}
