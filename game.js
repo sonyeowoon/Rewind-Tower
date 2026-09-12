@@ -119,7 +119,25 @@
     $("input-progress").setAttribute("aria-label", `${level}개 중 ${inputIndex}개 입력`);
     setColorButtonsEnabled(gameState === "PLAYING" && phase === "input" && !isShowingSequence);
   }
-  function addRandomColor() { colorSequence.push(colors[Math.floor(Math.random() * colors.length)]); }
+  function generateRoundSequence() {
+    const previous = colorSequence;
+    // By round 2 all three colors have appeared. From round 3, include
+    // every color in each round, then shuffle a completely fresh pattern.
+    const next = level === 2
+      ? colors.filter((color) => !previous.includes(color))
+      : level >= 3 ? [...colors] : [];
+    while (next.length < level) next.push(colors[Math.floor(Math.random() * colors.length)]);
+    for (let i = next.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [next[i], next[j]] = [next[j], next[i]];
+    }
+    // Prevent accidentally reusing the entire previous pattern as a prefix.
+    if (previous.length && previous.every((color, index) => next[index] === color)) {
+      const other = next.findIndex((color) => color !== next[0]);
+      [next[0], next[other]] = [next[other], next[0]];
+    }
+    colorSequence = next;
+  }
   async function highlightColor(color, duration) {
     const button = buttons.find((item) => item.dataset.color === color);
     button.classList.add("lit");
@@ -154,7 +172,7 @@
     gameState = "PLAYING";
     score = 0; level = 1; colorSequence = []; playerSequence = []; inputIndex = 0;
     previousBest = bestScore;
-    addRandomColor();
+    generateRoundSequence();
     playBgm();
     void showSequence();
   }
@@ -174,12 +192,12 @@
     updateDisplay();
     if (level === maxLevel) { endGame(true); return; }
     const token = generation;
-    setStatus(`${level}단계 성공 · +10점`, "정확해요! 잘 기억했어요", "이번에는 색깔이 하나 더 늘어나요.");
+    setStatus(`${level}단계 성공 · +10점`, "정확해요! 잘 기억했어요", "다음은 한 칸 더 긴 새로운 패턴이에요.");
     $("control-hint").textContent = "잠시 후 다음 단계가 시작돼요.";
     playSound("correct");
     if (!(await wait(1050)) || token !== generation) return;
     level++;
-    addRandomColor();
+    generateRoundSequence();
     void showSequence();
   }
   function endGame(isWin, expected, selected) {
@@ -202,7 +220,7 @@
     cancelPending(); stopBgm(); stopEffects();
     gameState = "READY"; phase = "ready";
     score = 0; level = 1; colorSequence = []; playerSequence = []; inputIndex = 0; isShowingSequence = false;
-    setStatus("준비되셨나요?", "기억력에 불을 켜볼까요?", "하나씩 늘어나는 색깔 순서, 5단계에 도전해 보세요.");
+    setStatus("준비되셨나요?", "기억력에 불을 켜볼까요?", "매 라운드 새로운 색깔 패턴, 5단계에 도전해 보세요.");
     $("control-hint").textContent = "시간 제한 없이, 천천히 즐겨요.";
     updateDisplay();
   }
@@ -222,7 +240,7 @@
     if (document.hidden) {
       bgm.pause(); stopEffects();
       if (phase === "showing" || phase === "transition") {
-        if (phase === "transition") { level++; addRandomColor(); }
+        if (phase === "transition") { level++; generateRoundSequence(); }
         cancelPending(); phase = "paused"; isShowingSequence = true; updateDisplay();
       }
     } else {
