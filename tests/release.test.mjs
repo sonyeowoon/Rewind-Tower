@@ -27,6 +27,13 @@ test('Production release uses fingerprinted, case-correct, relative module and a
   }
   assert.equal(files.has('README.md'),false); assert.equal(files.has('tests/browser.mjs'),false);
 });
+test('Vercel builds the static release from dist instead of a stale public directory',async()=>{
+  const config=JSON.parse(await readFile(resolve(project,'vercel.json'),'utf8'));
+  assert.equal(config.$schema,'https://openapi.vercel.sh/vercel.json');
+  assert.equal(config.buildCommand,'npm run build');
+  assert.equal(config.outputDirectory,'dist');
+  assert.equal((await readFile(resolve(project,'dist/index.html'),'utf8')).includes('<!doctype html>'),true);
+});
 test('Release serves under a repository subpath with redirects, correct MIME, reload and MP3 ranges',async()=>{
   const server=createStaticServer(resolve(project,'dist'),'/rewind-tower/');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));

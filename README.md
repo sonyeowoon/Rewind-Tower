@@ -97,6 +97,8 @@ node scripts/serve.mjs --dist --base=/rewind-tower/
 
 Sites 또는 GitHub Pages에는 `dist/` 내용물을 정적 출력으로 배포합니다. `index.html`은 출력 최상위에 있으며 리소스는 상대 경로와 모듈 기준 URL을 사용합니다. JavaScript/CSS 파일명에 내용 해시를, 이미지/음악 URL에는 버전 쿼리를 붙여 다른 버전의 캐시가 섞이지 않게 합니다. 로컬 재빌드에서는 이전 버전 모듈을 보존하고 CI의 새 체크아웃에서는 현재 버전만 생성합니다.
 
+Vercel은 저장소 루트의 `vercel.json`을 사용합니다. 빌드 명령은 `npm run build`, Output Directory는 `dist`입니다. 이전 프로젝트에서 `public`을 출력 폴더로 사용했더라도 저장소 설정이 현재 게임의 `dist`로 덮어씁니다. Vercel의 Root Directory는 이 `package.json`과 `vercel.json`이 있는 저장소 루트여야 합니다.
+
 GitHub 저장소에서 **Settings → Pages → Source: GitHub Actions**로 지정하면 포함된 워크플로가 테스트와 빌드를 수행한 뒤 기본 브랜치의 변경을 배포합니다. PR과 다른 브랜치는 검증만 수행합니다. 설정 방식은 [GitHub 공식 문서](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)를 기준으로 합니다.
 
 Sites는 사이트를 등록한 뒤 실제 사이트 ID와 함께 정적 출력 디렉터리를 `dist`로 연결하는 방식으로 준비했습니다. 이 작업에서는 원격 저장소 생성, Sites 등록 또는 실제 배포를 수행하지 않았습니다. 호스트별 연결 조건과 실제 환경에서 확인할 항목은 `docs/deployment.md`에 정리했습니다.

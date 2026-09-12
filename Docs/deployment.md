@@ -1,5 +1,11 @@
 # 배포 준비와 검증 기록
 
+## Vercel
+
+저장소 루트의 `vercel.json`이 빌드 명령을 `npm run build`, 정적 출력 폴더를 `dist`로 지정합니다. 이전 게임의 프로젝트 설정에 `public`이 남아 있어도 이 저장소 설정이 출력 폴더를 덮어씁니다.
+
+Vercel 프로젝트의 Root Directory는 이 저장소 루트로 둡니다. 별도 하위 폴더로 지정되어 있으면 루트의 `package.json`과 `vercel.json`을 읽지 못하므로 Project Settings → Build and Deployment에서 Root Directory를 비우거나 이 프로젝트의 실제 위치로 수정해야 합니다. 설정이 포함된 커밋을 push하면 새 배포가 자동으로 시작되며, 기존 실패 배포에서도 Redeploy할 수 있습니다.
+
 ## 배포 결과물
 
 `npm run build`는 제공 이미지 15개와 추가 생성 배경 1개, 사운드 29개와 런타임 파일 9개를 `dist/`에 준비합니다. 기획서, 테스트, 로컬 서버, 원본 스타일 참고판 등은 배포 대상에서 제외합니다. 외부 API 키, 서버, 데이터베이스가 필요하지 않습니다.
